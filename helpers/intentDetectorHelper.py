@@ -1,5 +1,5 @@
 import re
-from state import getMessage, setIntent
+from .stateHelper import getMessage, setIntent
 
 def fetchByRegex(state, new_intent, regex, flags=re.IGNORECASE):
     message = getMessage(state)

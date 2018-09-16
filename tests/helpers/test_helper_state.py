@@ -2,7 +2,7 @@ import unittest
 import sys
 
 sys.path.insert(0,'..')
-from mononoke.helpers.state import *
+from mononoke.helpers.stateHelper import createNewState, getIntent, setIntent, getContext, setContext, getMessage, setMessage, getReply, setReply
 
 class Test_helper_state(unittest.TestCase):
     def setUp(self):
@@ -17,24 +17,12 @@ class Test_helper_state(unittest.TestCase):
         }
         state = createNewState()
         self.assertDictEqual(state, expected)
-    
-    def test_get_from(self):
-        dictionary = {"a": 5}
-        # get existing key from dictionary
-        value = getFrom(dictionary, "a")
-        self.assertEqual(value, 5)
-        # get non-existing key from dictionary
-        value = getFrom(dictionary, "b")
-        self.assertEqual(value, None)
-        # get non-existing key from dictionary with defaultValue
-        value = getFrom(dictionary, "b", "defaultValue")
-        self.assertEqual(value, "defaultValue")
-    
+
     def test_intent(self):
         state = createNewState()
         # get intent from new state
         intent = getIntent(state)
-        self.assertEqual(intent, None)
+        self.assertEqual(intent, "")
         # set intent and re-fetch it
         setIntent(state, "food.order")
         intent = getIntent(state)
@@ -49,7 +37,17 @@ class Test_helper_state(unittest.TestCase):
         setMessage(state, "hi")
         message = getMessage(state)
         self.assertEqual(message, "hi")
-    
+
+    def test_reply(self):
+        state = createNewState()
+        # get reply from new state
+        reply = getReply(state)
+        self.assertEqual(reply, "")
+        # set reply and re-fetch it
+        setReply(state, "hi")
+        reply = getReply(state)
+        self.assertEqual(reply, "hi")
+ 
     def test_context(self):
         state = createNewState()
         # get context from new state

@@ -146,7 +146,22 @@ To overcome this, I see some people prefer CNN (Convulational Neural Network) or
 
 ### Slotting and Named Entity Recognition (Makoto)
 
-After a chatbot understand user's intent, it needs to
+After a chatbot understand user's intent, it needs to get the entities. The process to acquired the entity is named NER (Named Entity Recognition).
+
+The purpose of NER is to transform this message:
+
+```
+I want to order 2 pan pizza
+```
+
+into:
+
+```
+{
+    "food": "pizza",
+    "quantity": 2
+}
+```
 
 ### The Flow (Katachi)
 
@@ -154,12 +169,12 @@ Let's see again at our third scenario. In the scenario, you ask Kana to order fa
 
 In order to make the chatbot able to handle the possibilities, the chatbot creator has to first define the dialog flow.
 
-I guess, in general, our chatbot will looks like this:
+I guess, in general, our chatbot can be written as [Kana.py](examples/kana.py):
 
 
 # Final
 
 I write this article so that I can learn better about chatbot as well as teaching others. However, if you are not interested to build your own chatbot from scratch, yet you want to have a fully functional bot, you can visit:
 
-* [Kata.ai](https://kata.ai/) for building Bahasa Indonesia chatbot. They have bot studio as well as nl studio. And I work there as backend-engineer (which is awesome) :)
+* [Kata.ai](https://kata.ai/) for building Bahasa Indonesia chatbot.
 * [Dialog Flow](https://dialogflow.com/) for building English and any other language based chatbot.

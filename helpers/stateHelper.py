@@ -1,26 +1,26 @@
-from dictionary import getFrom, setTo
+from .dictionaryHelper import getFrom, setTo
 
 def createNewState():
     return {
-        "intent": None,
+        "intent": "",
         "context": {},
         "message": "",
         "reply": ""
     }
 
-def getIntent(state, default_value=None):
+def getIntent(state, default_value=""):
     return getFrom(state, "intent", default_value)
 
 def setIntent(state, intent):
     setTo(state, "intent", intent)
 
-def getMessage(state, default_value=None):
+def getMessage(state, default_value=""):
     return getFrom(state, "message", default_value)
 
 def setMessage(state, message):
     setTo(state, "message", message)
 
-def getReply(state, default_value=None):
+def getReply(state, default_value=""):
     return getFrom(state, "reply", default_value)
 
 def setReply(state, message):

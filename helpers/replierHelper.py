@@ -1,10 +1,11 @@
 from random import randint
 from string import Template
-from state import setReply
+from .dictionaryHelper import getFrom
+from .stateHelper import setReply
 
 def replyByTemplate(state, str_template):
     template = Template(str_template)
-    context = state["context"]
+    context = getFrom(state, "context")
     reply = template.substitute(**context)
     setReply(state, reply)
 

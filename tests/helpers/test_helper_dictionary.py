@@ -2,7 +2,7 @@ import unittest
 import sys
 
 sys.path.insert(0,'..')
-from mononoke.helpers.dictionary import *
+from mononoke.helpers.dictionaryHelper import *
 
 class Test_helper_dictionary(unittest.TestCase):
     def setUp(self):
