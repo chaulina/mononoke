@@ -1,6 +1,9 @@
 import re
 from .stateHelper import getMessage, setContext
 
+def resetContext(state):
+    state["context"] = {}
+
 def setContextByRegex(state, entity_names, regex = "(.*)", flags = re.IGNORECASE):
     message = getMessage(state)
     pattern = re.compile(regex, flags)

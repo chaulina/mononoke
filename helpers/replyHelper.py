@@ -10,6 +10,10 @@ def reply(state, str_template):
     reply = template.substitute(**context)
     setReply(state, reply)
 
+def setReplyByTemplateList(state, str_template_list):
+    index = randint(0, len(str_template_list) - 1)
+    reply(state, str_template_list[index])
+
 def setReplyByRegex(state, str_template_list, regex=".*", flags=re.IGNORECASE):
     message = getMessage(state)
     pattern = re.compile(regex, flags)
