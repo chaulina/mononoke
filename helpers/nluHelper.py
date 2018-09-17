@@ -1,72 +1,75 @@
 import re
-from .entityFetcherHelper import fetchByRegex as fetchEntityByRegex, fetchByRegexList as fetchEntityByRegexList
-from .intentDetectorHelper import fetchByRegex as fetchIntentByRegex, fetchByRegexList as fetchIntentByRegexList
-from .replierHelper import replyByTemplate, replyByTemplateList
+from .contextHelper import setContextByRegex, setContextByRegexList
+from .intentHelper import setIntentByRegex, setIntentByRegexList
+from .replyHelper import setReplyByRegex, setReplyByRegexList
 from .stateHelper import getIntent
 from .dictionaryHelper import getFrom, setTo
 
-fallback_nlu_config = {
-    "old_intent": ".*",
-    "new_intent": "",
-    "actions": {
-        "intent": {
-            "method": "regex",
-            "params": [".*"]
-        },
-        "entity": {
-            "method": "regex",
-            "params": [["unknown_input"], "(.*)"]
-        },
-        "reply": {
-            "method": "template_list",
+cancel_nlu_config = {
+    "old_intent": ".*", # match all intent
+    "actions": [
+        {
+            "method": "set_intent_by_regex_list",
             "params": [
-                ["Sorry I don't understand '$unknown_input'", "Could you please describe '$unknown_input'?"]
+                "",                             # new intent
+                [".*forget.*", ".*cancel.*"]    # message pattern
+            ]
+        },
+        {
+            "method": "set_reply_by_regex_list",
+            "params": [
+                ["Ok", "Ok, let's start something new"],
+                [".*forget.*", ".*cancel.*"]
             ]
         }
-    }
+    ]
+}
+
+fallback_nlu_config = {
+    "old_intent": ".*", # match all intent
+    "actions": [
+        {
+            "method": "set_intent_by_regex",
+            "params": [
+                "",     # new intent
+                ".*"    # message pattern
+            ]
+        },
+        {
+            "method": "set_context_by_regex",
+            "params": [
+                ["unknown_input"],  # set matched group as unknown_input 
+                "(.*)"
+            ]
+        },
+        {
+            "method": "set_reply_by_regex_list",
+            "params": [
+                ["Sorry I don't understand '$unknown_input'", "Could you please describe '$unknown_input'?"],
+                ".*"
+            ]
+        }
+    ]
 }
 
 default_action_config = {
-    "intent": {
-        "regex": fetchIntentByRegex,
-        "regex_list": fetchIntentByRegexList
-    },
-    "entity": {
-        "regex" : fetchEntityByRegex,
-        "regex_list": fetchEntityByRegexList
-    },
-    "reply": {
-        "template": replyByTemplate,
-        "template_list": replyByTemplateList
-    }
+    "set_intent_by_regex": setIntentByRegex,
+    "set_intent_by_regex_list": setIntentByRegexList,
+    "set_context_by_regex" : setContextByRegex,
+    "set_context_by_regex_list": setContextByRegexList,
+    "set_reply_by_regex": setReplyByRegex,
+    "set_reply_by_regex_list": setReplyByRegexList,
 }
 
 def normalizeActionConfig(action_config = {}):
-    for action_group in default_action_config:
-        for action_name in default_action_config[action_group]:
-            key = action_group + "." + action_name
-            value = getFrom(default_action_config, key)
-            if getFrom(action_config, key) == None:
-                setTo(action_config, key, value)
+    for action_name in default_action_config:
+        value = getFrom(default_action_config, action_name)
+        if getFrom(action_config, action_name) == None:
+            setTo(action_config, action_name, value)
 
 def normalizeNluConfigList(nlu_config_list = []):
     if len(nlu_config_list) == 0:
         nlu_config_list.append(dict(fallback_nlu_config))
-
-def processIntent(state, nlu_config = {}, action_config = {}):
-    new_intent = getFrom(nlu_config, "new_intent")
-    method_name = getFrom(nlu_config, "actions.intent.method")
-    if method_name:
-        params = getFrom(nlu_config, "actions.intent.params")
-        method = getFrom(action_config, "intent." + method_name)
-        method(state, new_intent, *params)
-
-def processEntity(state, nlu_config = {}, action_config = {}):
-    method_name = getFrom(nlu_config, "actions.entity.method")
-    if method_name:
-        params = getFrom(nlu_config, "actions.entity.params")
-        method = getFrom(action_config, "entity." + method_name)
-        method(state, *params)
 
 def processReply(state, nlu_config = {}, action_config = {}):
     method_name = getFrom(nlu_config, "actions.reply.method")
@@ -79,12 +82,18 @@ def dialog(state, nlu_config_list = [], action_config = {}):
     normalizeActionConfig(action_config)
     normalizeNluConfigList(nlu_config_list)
     for nlu_config in nlu_config_list:
+        # detect whether old_intent pattern match current_intent
         old_intent = getFrom(nlu_config, "old_intent")
         current_intent = getIntent(state)
         pattern_match = False
         if old_intent != None and current_intent != None:
             pattern_match = re.compile(old_intent).match(current_intent)
         if pattern_match:
-            processIntent(state, nlu_config, action_config)
-            processEntity(state, nlu_config, action_config)
-            processReply(state, nlu_config, action_config)
+            # fetch action and method
+            for action in getFrom(nlu_config, "actions"):
+                method_name = getFrom(action, "method")
+                if method_name:
+                    params = getFrom(action, "params")
+                    method = getFrom(action_config, method_name)
+                    method(state, *params)
+            break

@@ -1,7 +1,7 @@
 import re
 from .stateHelper import getMessage, setContext
 
-def fetchByRegex(state, entity_names, regex = "(.*)", flags = re.IGNORECASE):
+def setContextByRegex(state, entity_names, regex = "(.*)", flags = re.IGNORECASE):
     message = getMessage(state)
     pattern = re.compile(regex, flags)
     match = pattern.match(message)
@@ -12,9 +12,9 @@ def fetchByRegex(state, entity_names, regex = "(.*)", flags = re.IGNORECASE):
             setContext(state, entity_name, value)
     return match
 
-def fetchByRegexList(state, entity_names, regex_list = [], flags = re.IGNORECASE):
+def setContextByRegexList(state, entity_names, regex_list = [], flags = re.IGNORECASE):
     for regex in regex_list:
-        match = fetchByRegex(state, entity_names, regex, flags)
+        match = setContextByRegex(state, entity_names, regex, flags)
         if match:
             break
 
