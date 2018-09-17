@@ -1,6 +1,6 @@
 # Mononoke
 
-Mononoke is my chatbot-framework hobby-framework. This is not meant to be a serious project, since my purpose of creating this is just for learning and understanding chatbot in the details.
+Mononoke is my chatbot-framework hobby-project. This is not meant to be a serious project, since my purpose of creating this is just to learn and understanding chatbot in the details.
 
 To achieve the quest, I will use a very minimal amount of third-party libraries.
 
@@ -8,7 +8,7 @@ To achieve the quest, I will use a very minimal amount of third-party libraries.
 
 # The Chatbot Overview
 
-Chatbot is basically another user interface so that the program can talk and understand what type/say, and translate it into structured command.
+Chatbot is basically another user interface so that the program can talk and understand what user type/say, and translate it into structured command.
 
 Every chatbot need some NLP (natural language processing) technique. Let's start with an example of a dialog with a chatbot named `Kana`:
 
@@ -169,7 +169,7 @@ Let's see again at our third scenario. In the scenario, you ask Kana to order fa
 
 In order to make the chatbot able to handle the possibilities, the chatbot creator has to first define the dialog flow.
 
-I guess, in general, our chatbot can be written as [Kana.py](examples/kana.py):
+I guess, in general, our chatbot can be written as [Kana.py](example/kana.py):
 
 
 # Final
