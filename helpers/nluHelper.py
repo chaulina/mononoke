@@ -7,60 +7,23 @@ from .dictionaryHelper import getFrom, setTo
 
 cancel_nlu_config = {
     "conditions": [
-        {
-            "method": "match_intent_by_regex_list",
-            "params": [
-                [".*forget.*", ".*cancel.*"]
-            ]
-        }
+        ["match_intent_by_regex_list", [".*forget.*", ".*cancel.*"]]
     ],
     "actions": [
-        {
-            "method": "set_intent",
-            "params": [""]
-        },
-        {
-            "method": "set_reply",
-            "params": [
-                ["Ok", "Ok, let's start something new"],
-            ]
-        },
-        {
-            "method": "reset_context",
-            "params": []
-        }
+        ["set_intent", ""],
+        ["set_reply", ["Ok", "Ok, let's start something new"]],
+        ["reset_context"]
     ]
 }
 
 fallback_nlu_config = {
     "conditions": [
-        {
-            "method": "match_intent_by_regex",
-            "params": [".*"]
-        }
+        ["match_intent_by_regex", ".*"]
     ],
     "actions": [
-        {
-            "method": "set_intent_by_regex",
-            "params": [
-                "",     # new intent
-                ".*"    # message pattern
-            ]
-        },
-        {
-            "method": "set_context_by_regex",
-            "params": [
-                ["unknown_input"],  # set matched group as unknown_input 
-                "(.*)"
-            ]
-        },
-        {
-            "method": "set_reply_by_regex_list",
-            "params": [
-                ["Sorry I don't understand '$unknown_input'", "Could you please describe '$unknown_input'?"],
-                ".*"
-            ]
-        }
+        ["set_intent_by_regex", "", ".*"],
+        ["set_context_by_regex", ["unknown_input"], "(.*)"],
+        ["set_reply", ["Sorry I don't understand '$unknown_input'", "Could you please describe '$unknown_input'?"]]
     ]
 }
 
@@ -96,19 +59,17 @@ def dialog(state, nlu_config_list = [], action_config = {}):
         # detect whether condition met
         match = True
         for condition in getFrom(nlu_config, "conditions"):
-            method_name = getFrom(condition, "method")
-            if method_name:
-                params = getFrom(condition, "params")
-                method = getFrom(action_config, method_name)
-                if not method(state, *params):
-                    match = False
-                    break
+            method_name = condition[0]
+            params = condition[1:]
+            method = getFrom(action_config, method_name)
+            if not method(state, *params):
+                match = False
+                break
         if match:
             # fetch action and method
             for action in getFrom(nlu_config, "actions"):
-                method_name = getFrom(action, "method")
-                if method_name:
-                    params = getFrom(action, "params")
-                    method = getFrom(action_config, method_name)
-                    method(state, *params)
+                method_name = action[0]
+                params = action[1:]
+                method = getFrom(action_config, method_name)
+                method(state, *params)
             break

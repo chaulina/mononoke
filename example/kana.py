@@ -7,26 +7,12 @@ nlu_config_list = [
     cancel_nlu_config,
     {
         "conditions": [
-            {
-                "method": "match_intent_by_regex_list",
-                "params": [["I want to order .*"]]
-            }
+            ["match_intent_by_regex_list", ["I want to order .*"]]
         ],
         "actions": [
-            {
-                "method": "set_intent",
-                "params": ["food.order"]
-            },
-            {
-                "method": "set_context_by_regex_list",
-                "params": [["food"], ["I want to order (.*)"]]
-            },
-            {
-                "method": "set_reply",
-                "params": [
-                    ["You have just order $food", "Your $food is coming"]
-                ]
-            },
+            ["set_intent", "food.order"],
+            ["set_context_by_regex_list", ["food"], ["I want to order (.*)"]],
+            ["set_reply", ["You have just order $food", "Your $food is coming"]]
         ]
     },
     fallback_nlu_config,
