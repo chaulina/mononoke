@@ -94,14 +94,14 @@ def dialog(state, nlu_config_list = [], action_config = {}):
     normalizeNluConfigList(nlu_config_list)
     for nlu_config in nlu_config_list:
         # detect whether condition met
-        match = False
+        match = True
         for condition in getFrom(nlu_config, "conditions"):
             method_name = getFrom(condition, "method")
             if method_name:
                 params = getFrom(condition, "params")
                 method = getFrom(action_config, method_name)
-                if method(state, *params):
-                    match = True
+                if not method(state, *params):
+                    match = False
                     break
         if match:
             # fetch action and method
