@@ -1,14 +1,19 @@
 import re
-from .stateHelper import getMessage, setIntent
+from .stateHelper import getIntent, getMessage, setIntent
 
 def matchIntentByRegex(state, regex, flags=re.IGNORECASE):
+    message = getIntent(state)
+    pattern = re.compile(regex, flags)
+    return pattern.match(message)
+
+def matchMessageByRegex(state, regex, flags=re.IGNORECASE):
     message = getMessage(state)
     pattern = re.compile(regex, flags)
     return pattern.match(message)
 
-def matchIntentByRegexList(state, regex_list, flags=re.IGNORECASE):
+def matchMessageByRegexList(state, regex_list, flags=re.IGNORECASE):
     for regex in regex_list:
-        match = matchIntentByRegex(state, regex, flags)
+        match = matchMessageByRegex(state, regex, flags)
         if match:
             return True
     return False

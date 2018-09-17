@@ -1,13 +1,14 @@
 import re
-from .contextHelper import setContextByRegex, setContextByRegexList, resetContext
-from .intentHelper import matchIntentByRegex, matchIntentByRegexList, setIntentByRegex, setIntentByRegexList
+from .contextHelper import hasContext, missingContext, setContextByRegex, setContextByRegexList, resetContext, removeContext
+from .dictionaryHelper import getFrom, setTo
+from .intentHelper import matchIntentByRegex, setIntentByRegex, setIntentByRegexList
+from .messageHelper import matchMessageByRegex, matchMessageByRegexList
 from .replyHelper import setReplyByRegex, setReplyByRegexList, setReplyByTemplateList
 from .stateHelper import getIntent, setIntent, setContext, setReply
-from .dictionaryHelper import getFrom, setTo
 
 cancel_nlu_config = {
     "conditions": [
-        ["match_intent_by_regex_list", [".*forget.*", ".*cancel.*"]]
+        ["match_message_by_regex_list", [".*forget.*", ".*cancel.*"]]
     ],
     "actions": [
         ["set_intent", ""],
@@ -21,7 +22,6 @@ fallback_nlu_config = {
         ["match_intent_by_regex", ".*"]
     ],
     "actions": [
-        ["set_intent_by_regex", "", ".*"],
         ["set_context_by_regex", ["unknown_input"], "(.*)"],
         ["set_reply", ["Sorry I don't understand '$unknown_input'", "Could you please describe '$unknown_input'?"]]
     ]
@@ -29,11 +29,15 @@ fallback_nlu_config = {
 
 default_action_config = {
     "match_intent_by_regex": matchIntentByRegex,
-    "match_intent_by_regex_list": matchIntentByRegexList,
+    "match_message_by_regex": matchMessageByRegex,
+    "match_message_by_regex_list": matchMessageByRegexList,
     "set_intent": setIntent,
     "set_intent_by_regex": setIntentByRegex,
     "set_intent_by_regex_list": setIntentByRegexList,
     "reset_context": resetContext,
+    "has_context": hasContext,
+    "missing_context": missingContext,
+    "remove_context": removeContext,
     "set_context": setContext,
     "set_context_by_regex" : setContextByRegex,
     "set_context_by_regex_list": setContextByRegexList,

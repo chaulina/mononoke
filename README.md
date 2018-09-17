@@ -80,20 +80,20 @@ In order to do it's job, a chatbot has to know what it suppose to do, detect use
 
 ### Intent Detection (Kotawari)
 
-A human can easily understand this texts and conclude that the writer probably want to order something from the restaurant.:
+We can easily understand the following texts and conclude that the writer probably want to order something from the restaurant.:
 * `I want to order a pizza`
 * `I am hungry, very hungry`
 * `It is going to be perfect if we have fried chicken now`
 
-As for computer, this is not something easy. Computer mostly work with numbers. Altough in some cases, computer can understand formal languages (like Python or Java), it is not an easy task to understand a natural language.
+But for computer, this is not something easy. Computer mostly work with numbers. It is true that in some cases, computer can understand formal languages (like Python or Java). But understanding natural language is something totally different.
 
 Natural language change over time, influenced by culture and context, and somehow chaotic (i.e: Doesn't have a concise and simple rule).
 
-This make intent detection a difficult task. There are two approaches to detect intent:
+This make intent detection a difficult task. So far, there are two approaches to detect intent:
 * Predefined pattern based
 * Machine learning
 
-Predefined pattern based is quite easy. But it is not scalable. For example, to detect  a user intent, I might make a simple if statements:
+Predefined-pattern-based recognition is quite easy. But it is not scalable. For example, to detect  a user intent, I might make a simple if statements:
 
 ```python
 intent = null
@@ -163,18 +163,151 @@ into:
 }
 ```
 
+The easiest way for slotting is of course by using hard-coded regex as follow:
+
+```python
+import re
+message = 'I want to order 2 pan pizza'
+pattern = re.compile('i want to order ([0-9]*) pan (.*))
+match = pattern.match(message)
+if match:
+    print("food " + match.group(2))
+    print("quantity " + match.group(1))
+```
+
+But again, this approach doesn't scale quite well. NER is a quite difficult topic. Nowadays people try to solve this problem by combining machine learning + semantics.
+
 ### The Flow (Katachi)
 
 Let's see again at our third scenario. In the scenario, you ask Kana to order fast-food. But, in the middle of the conversation, you change your mind, and you want to listen Kajiuran music instead.
 
 In order to make the chatbot able to handle the possibilities, the chatbot creator has to first define the dialog flow.
 
-I guess, in general, our chatbot can be written as [Kana.py](example/kana.py):
+I guess, in general, our chatbot can be written as [kana.py](example/kana.py):
 
+```python
+import sys
+sys.path.insert(0,'..')
+from helpers.stateHelper import createNewState, getReply, setMessage
+from helpers.nluHelper import dialog, fallback_nlu_config, cancel_nlu_config
+
+nlu_config_list = [
+    cancel_nlu_config,
+
+    {
+        'conditions': [
+            ['match_intent_by_regex', 'food.order'],
+            ['missing_context', 'food'],
+        ],
+        'actions': [
+            ['set_intent', ''],
+            ['set_context_by_regex_list', ['food'], ['I want to order (.*)', '(.*)']],
+            ['set_reply', ['You have just order $food', 'Your $food is coming']],
+            ['set_context', 'food', None]
+        ]
+    },
+
+    # order food
+    {
+        'conditions': [
+            ['match_message_by_regex_list', ['I want to order .*']]
+        ],
+        'actions': [
+            ['set_intent', ''],
+            ['set_context_by_regex_list', ['food'], ['I want to order (.*)']],
+            ['set_reply', ['You have just order $food', 'Your $food is coming']],
+            ['set_context', 'food', None]
+        ]
+    },
+
+    # order food
+    {
+        'conditions': [
+            ['match_message_by_regex_list', ['.*hungry.*', '.*eat.*']]
+        ],
+        'actions': [
+            ['set_intent', 'food.order'],
+            ['set_reply', ['Any preference?', 'What do you like to eat?']]
+        ]
+    },
+
+    # previously, user want to play music now he specify the query
+    {
+        'conditions': [
+            ['match_intent_by_regex', 'music.play'],
+            ['missing_context', 'music_query'],
+            ['match_message_by_regex_list', ['play .* music', 'play me .*', '.*']]
+        ],
+        'actions': [
+            ['set_intent', ''],
+            ['set_context_by_regex_list', ['music_query'], ['play (.*) music', 'play me (.*)', '(.*)']],
+            ['set_reply', ['Please open https://youtube.com?watch=$music_query']],
+            ['set_context', 'music_query', None]
+        ]
+    },
+
+    # user want to play music and already specify query
+    {
+        'conditions': [
+            ['match_message_by_regex_list', ['play .* music', 'play me .*']]
+        ],
+        'actions': [
+            ['set_intent', ''],
+            ['set_context_by_regex_list', ['music_query'], ['play (.*) music', 'play me (.*)']],
+            ['set_reply', ['Please open https://youtube.com?watch=$music_query']],
+            ['set_context', 'music_query', None]
+        ]
+    },
+
+    # user want to play music but not specify the query
+    {
+        'conditions': [
+            ['match_message_by_regex_list', ['.*music.*', '.*song']]
+        ],
+        'actions': [
+            ['set_intent', 'music.play'],
+            ['set_reply', ['Any preference?', 'What do you want to play?']]
+        ]
+    },
+
+    fallback_nlu_config,
+]
+state = createNewState()
+
+print('Press ctrl + c to end chat')
+while True:
+    print('You: ', end='', flush=True)
+    setMessage(state, input())
+    dialog(state, nlu_config_list)
+    print('Kana: ' + getReply(state))
+
+```
+
+## Chatbot in Action
+
+Okay, now let's see our `Kana` do the real job:
+
+```
+gofrendi@asgard:~/Projects/mononoke/example$ python3 kana.py
+Press ctrl + c to end chat
+You: Hi
+Kana: Sorry I don't understand 'Hi'
+You: it is going to be nice if we have music
+Kana: What do you want to play?
+You: forget it
+Kana: Ok, let's start something new
+You: I'm hungry now
+Kana: Any preference?
+You: burger
+Kana: You have just order burger
+You:
+```
+
+Good enough for a chatbot based on regex, isn't it?
 
 # Final
 
-I write this article so that I can learn better about chatbot as well as teaching others. However, if you are not interested to build your own chatbot from scratch, yet you want to have a fully functional bot, you can visit:
+I write this article so that I can learn better about chatbot as well as teaching others. However, if you are are interested to build your own smart-functional-chatbot, you can visit:
 
 * [Kata.ai](https://kata.ai/) for building Bahasa Indonesia chatbot.
 * [Dialog Flow](https://dialogflow.com/) for building English and any other language based chatbot.
